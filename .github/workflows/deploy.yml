@@ -32,9 +32,10 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          ARGS: "-rlgoDzvc -i --delete" # 增量同步，并删除服务器上多余的旧文件
-          SOURCE: "dist/"               # Vite/React 默认打包目录是 dist，如果是 build 请修改
           REMOTE_HOST: ${{ secrets.SERVER_HOST }}
           REMOTE_USER: ${{ secrets.SERVER_USER }}
-          TARGET: "/var/www/dev-dad"    # 对应你 Nginx 配置里的 root 路径
+          REMOTE_PORT: "2222" # 关键：明确指定你的服务器 SSH 端口
+          TARGET: "/var/www/dev-dad"
+          SOURCE: "dist/"
+          ARGS: "-rlgoDzvc -i --delete"
           EXCLUDE: "/node_modules/"
