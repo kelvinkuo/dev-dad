@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { scheduleData } from "../schedule-data";
+import { playBlockSound, unlockAudio } from "../lib/sound";
 import RealTimeClock from "./RealTimeClock";
 import TimeDoughnut from "./TimeDoughnut";
 import DetailPanel from "./DetailPanel";
@@ -48,6 +49,8 @@ export default function Dashboard() {
   > | null>(null);
   const userOverrideRef = useRef(false);
   const returnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevBlockIndexRef = useRef<number>(-1);
+  const lastWasBeforeMiddleRef = useRef(true);
 
   useEffect(() => {
     const tick = () => {
@@ -56,10 +59,37 @@ export default function Dashboard() {
       if (!userOverrideRef.current && progress && progress.index >= 0) {
         setActiveIndex(progress.index);
       }
+
+      if (!progress || progress.index < 0) return;
+      const { index, elapsed } = progress;
+      const duration = scheduleData[index].duration;
+
+      if (index !== prevBlockIndexRef.current) {
+        prevBlockIndexRef.current = index;
+        lastWasBeforeMiddleRef.current = true;
+        playBlockSound("start");
+      } else if (duration > 0 && lastWasBeforeMiddleRef.current && elapsed >= duration / 2) {
+        lastWasBeforeMiddleRef.current = false;
+        playBlockSound("middle");
+      } else if (elapsed < duration / 2) {
+        lastWasBeforeMiddleRef.current = true;
+      }
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const onInteraction = () => {
+      unlockAudio();
+    };
+    window.addEventListener("click", onInteraction, { once: true });
+    window.addEventListener("keydown", onInteraction, { once: true });
+    return () => {
+      window.removeEventListener("click", onInteraction);
+      window.removeEventListener("keydown", onInteraction);
+    };
   }, []);
 
   const handleSegmentClick = useCallback((index: number) => {
@@ -95,9 +125,34 @@ export default function Dashboard() {
             </h1>
           </div>
         </div>
-        <div className="text-sm font-bold text-slate-700 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          16.5 小时清醒时间
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-slate-400 font-medium flex items-center gap-2">
+            <span>试听：</span>
+            <button
+              type="button"
+              onClick={() => {
+                unlockAudio();
+                playBlockSound("start");
+              }}
+              className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600"
+            >
+              开始音效
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                unlockAudio();
+                playBlockSound("middle");
+              }}
+              className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600"
+            >
+              中间音效
+            </button>
+          </div>
+          <div className="text-sm font-bold text-slate-700 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            16.5 小时清醒时间
+          </div>
         </div>
       </header>
 

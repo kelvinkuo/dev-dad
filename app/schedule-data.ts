@@ -41,9 +41,9 @@ export const scheduleData: ScheduleItem[] = [
     donutTitle: "规划",
     category: "日常杂务",
     duration: 2.0,
-    colorHex: "#64748b",
-    bgClass: "bg-slate-100 text-slate-700",
-    borderClass: "border-slate-200",
+    colorHex: "#0ea5e9",
+    bgClass: "bg-sky-50 text-sky-700",
+    borderClass: "border-sky-200",
     icon: "🧹",
     details:
       "制定计划、阅读、新闻、打扫、晚饭食材准备。因为雨果能自理，可以安心看新闻、理清一天思路，顺手把晚上的食材解冻或洗切好。",

@@ -105,28 +105,37 @@ export default function TimeDoughnut({
     if (chartRef.current) applyActiveStyle(chartRef.current);
   }, [activeIndex, applyActiveStyle]);
 
-  // 0° = 7:00 = 晨间在圆环顶部；指针默认向上(12点)，故直接使用 currentTimeAngle
-  const handRotation = currentTimeAngle;
+  // 外侧游标：从当天起点(7:00)到当前时刻的连续弧线；半径略小于 50 确保描边不被容器裁切
+  const r = 49;
+  const circumference = 2 * Math.PI * r;
+  const arcLength = (currentTimeAngle / 360) * circumference;
+  const dashOffset = 0;
 
   return (
-    <div className="relative w-full max-w-[650px] mx-auto aspect-square">
+    <div className="relative w-full max-w-[650px] mx-auto aspect-square p-1">
       <canvas
         ref={canvasRef}
         id="timeDoughnut"
         className="absolute inset-0 w-full h-full"
       />
-      <div className="absolute inset-0 pointer-events-none" style={{ padding: "26%" }}>
-        <div
-          className="absolute left-1/2 w-1 rounded-full bg-slate-700 shadow-md"
-          style={{
-            top: "2%",
-            marginLeft: "-2px",
-            height: "48%",
-            transformOrigin: "center 100%",
-            transform: `rotate(${handRotation}deg)`,
-          }}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <circle
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          stroke="rgb(71 85 105)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeDasharray={`${arcLength} ${circumference - arcLength}`}
+          strokeDashoffset={dashOffset}
+          transform="rotate(-90 50 50)"
         />
-      </div>
+      </svg>
       <div className="doughnut-center-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none flex flex-col items-center justify-center w-48 h-48 rounded-full bg-white shadow-xl border-4 border-slate-50">
         <span className="text-sm text-slate-400 font-bold tracking-widest uppercase mb-1">
           Total Waking
