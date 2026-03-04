@@ -36,6 +36,6 @@ jobs:
           REMOTE_USER: ${{ secrets.SERVER_USER }}
           REMOTE_PORT: "2222" # 关键：明确指定你的服务器 SSH 端口
           TARGET: "/var/www/dev-dad"
-          SOURCE: "dist/"
+          SOURCE: "out/"
           ARGS: "-rlgoDzvc -i --delete"
           EXCLUDE: "/node_modules/"
