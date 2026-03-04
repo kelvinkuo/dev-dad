@@ -1,0 +1,40 @@
+name: Deploy dev-dad to Aliyun
+
+on:
+  push:
+    branches:
+      - main  # 或者是你的主分支名
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 拉取代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 安装 Node 环境并构建
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 建议使用 LTS 版本
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      # 3. 部署到服务器
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          ARGS: "-rlgoDzvc -i --delete" # 增量同步，并删除服务器上多余的旧文件
+          SOURCE: "dist/"               # Vite/React 默认打包目录是 dist，如果是 build 请修改
+          REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+          REMOTE_USER: ${{ secrets.SERVER_USER }}
+          TARGET: "/var/www/dev-dad"    # 对应你 Nginx 配置里的 root 路径
+          EXCLUDE: "/node_modules/"
