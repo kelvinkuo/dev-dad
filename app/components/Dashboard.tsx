@@ -162,6 +162,7 @@ export default function Dashboard() {
           <div className="w-full max-w-[650px] aspect-square flex items-center justify-center min-h-0 shrink">
             <TimeDoughnut
               activeIndex={activeIndex}
+              currentBlockIndex={blockProgress?.index ?? -1}
               onSegmentClick={handleSegmentClick}
               currentTimeAngle={blockProgress ? getCurrentTimeAngle(blockProgress.decimalTime) : 0}
             />

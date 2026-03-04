@@ -8,13 +8,22 @@ import { scheduleData } from "../schedule-data";
 
 ChartJS.register(ChartDataLabels);
 
-const INACTIVE_COLOR = "#e2e8f0";
+const UPCOMING_COLOR = "#e8edf2";
 const ACTIVE_BORDER = "#ffffff";
-const INACTIVE_BORDER = "#f8fafc";
+const INACTIVE_BORDER = "#f0f4f8";
 const ACTIVE_OFFSET = 15;
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 export interface TimeDoughnutProps {
   activeIndex: number;
+  /** 当前实际进行中的时间块索引（与 activeIndex 可能不同，用户可手动选择其他块） */
+  currentBlockIndex: number;
   onSegmentClick: (index: number) => void;
   /** 当前时刻在日盘上的角度（度），用于指针指向 */
   currentTimeAngle: number;
@@ -22,6 +31,7 @@ export interface TimeDoughnutProps {
 
 export default function TimeDoughnut({
   activeIndex,
+  currentBlockIndex,
   onSegmentClick,
   currentTimeAngle,
 }: TimeDoughnutProps) {
@@ -29,6 +39,7 @@ export default function TimeDoughnut({
   const chartRef = useRef<ChartJS<"doughnut"> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const activeIndexRef = useRef(activeIndex);
+  const currentBlockIndexRef = useRef(currentBlockIndex);
   const [chartGeometry, setChartGeometry] = useState<{
     cx: number;
     cy: number;
@@ -40,6 +51,10 @@ export default function TimeDoughnut({
   useEffect(() => {
     activeIndexRef.current = activeIndex;
   }, [activeIndex]);
+
+  useEffect(() => {
+    currentBlockIndexRef.current = currentBlockIndex;
+  }, [currentBlockIndex]);
 
   const syncChartGeometry = useCallback(() => {
     const chart = chartRef.current;
@@ -61,14 +76,19 @@ export default function TimeDoughnut({
 
   const applyActiveStyle = useCallback((chart: ChartJS<"doughnut">) => {
     const idx = activeIndexRef.current;
+    const cur = currentBlockIndexRef.current;
     const ds = chart.data.datasets[0];
     if (!ds) return;
-    ds.backgroundColor = scheduleData.map(
-      (_, i) => (i === idx ? scheduleData[i].colorHex : INACTIVE_COLOR)
-    );
-    ds.borderColor = scheduleData.map((_, i) =>
-      i === idx ? ACTIVE_BORDER : INACTIVE_BORDER
-    );
+    ds.backgroundColor = scheduleData.map((item, i) => {
+      if (i === idx) return item.colorHex;
+      if (i < cur) return hexToRgba(item.colorHex, 0.22); // 已完成：淡色印记
+      return UPCOMING_COLOR; // 未开始：中性灰
+    });
+    ds.borderColor = scheduleData.map((item, i) => {
+      if (i === idx) return ACTIVE_BORDER;
+      if (i < cur) return hexToRgba(item.colorHex, 0.15);
+      return INACTIVE_BORDER;
+    });
     ds.borderWidth = scheduleData.map((_, i) => (i === idx ? 4 : 1));
     ds.offset = scheduleData.map((_, i) => (i === idx ? ACTIVE_OFFSET : 0));
     chart.update("none");
@@ -103,15 +123,23 @@ export default function TimeDoughnut({
           legend: { display: false },
           tooltip: { enabled: false },
           datalabels: {
-            color: (context) =>
-              context.dataIndex === activeIndexRef.current ? "#ffffff" : "#64748b",
+            color: (context) => {
+              const i = context.dataIndex;
+              if (i === activeIndexRef.current) return "#ffffff";
+              if (i < currentBlockIndexRef.current) return scheduleData[i].colorHex;
+              return "#94a3b8";
+            },
             font: { weight: "bold", size: 20 },
             formatter: (value: number, context: { dataIndex: number }) => {
               if (value < 0.6) return "";
               return scheduleData[context.dataIndex].donutTitle;
             },
-            opacity: (context) =>
-              context.dataIndex === activeIndexRef.current ? 1 : 0.6,
+            opacity: (context) => {
+              const i = context.dataIndex;
+              if (i === activeIndexRef.current) return 1;
+              if (i < currentBlockIndexRef.current) return 0.6;
+              return 0.35;
+            },
           },
         },
         onClick: (_event, elements) => {
@@ -144,6 +172,11 @@ export default function TimeDoughnut({
   useEffect(() => {
     if (chartRef.current) applyActiveStyle(chartRef.current);
   }, [activeIndex, applyActiveStyle]);
+
+  useEffect(() => {
+    currentBlockIndexRef.current = currentBlockIndex;
+    if (chartRef.current) applyActiveStyle(chartRef.current);
+  }, [currentBlockIndex, applyActiveStyle]);
 
   // 外侧游标：SVG 与 canvas 共享同一像素坐标系，圆心和外径直接从 Chart.js 读取
   const arcR = chartGeometry?.outerRadius ?? 0;
