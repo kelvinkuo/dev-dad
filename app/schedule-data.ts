@@ -30,7 +30,15 @@ export const scheduleData: ScheduleItem[] = [
     borderClass: "border-emerald-200",
     icon: "🌅",
     details:
-      "起床、拉伸、喝温水、早饭、洗漱、上厕所。这是纯粹的个人状态启动时间，为一天的高效打下生理基础。",
+      `<p>纯粹的个人状态启动时间，为一天的高效打下生理基础。</p> <br>
+<ul>
+  <li><strong>起床</strong> — 醒来后可简单拉伸，避免赖床</li>
+  <li><strong>喝温水</strong> — 促进代谢，不建议用冷水</li>
+  <li><strong>拉伸</strong> — 唤醒身体，缓解僵硬，动作温和为主</li>
+  <li><strong>早饭</strong> — 营养均衡，不宜太油腻不吃重口味</li>
+  <li><strong>洗漱</strong> — 养成清洁习惯，保护牙齿与皮肤</li>
+  <li><strong>上厕所</strong> — 保持规律，早上排便更有益健康</li>
+</ul>`,
   },
   {
     id: 2,
@@ -46,7 +54,14 @@ export const scheduleData: ScheduleItem[] = [
     borderClass: "border-sky-200",
     icon: "🧹",
     details:
-      "制定计划、阅读、新闻、打扫、晚饭食材准备。因为雨果能自理，可以安心看新闻、理清一天思路，顺手把晚上的食材解冻或洗切好。",
+      `<p>雨果能自理，这两小时可安心处理杂务、理清一天思路。</p> <br>
+<ul>
+  <li><strong>拖地</strong> — 整理房间、拖地、保持卫生</li>
+  <li><strong>洗衣服</strong> — 检查脏衣袋</li>
+  <li><strong>餐食准备</strong> — 今日食材准备、下单、解冻</li>
+  <li><strong>制定计划</strong> — 看今日待办，排好优先级</li>
+  <li><strong>阅读 / 新闻</strong> — 了解资讯，不沉迷</li>
+</ul>`,
   },
   {
     id: 3,

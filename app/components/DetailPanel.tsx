@@ -28,9 +28,10 @@ export default function DetailPanel({ item }: DetailPanelProps) {
         </div>
       </div>
 
-      <div className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed border-t border-slate-100 pt-8">
-        <p dangerouslySetInnerHTML={{ __html: item.details }} />
-      </div>
+      <div
+        className="prose prose-slate prose-lg max-w-none text-slate-600 leading-relaxed border-t border-slate-100 pt-8 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_li]:leading-relaxed [&_strong]:text-slate-700"
+        dangerouslySetInnerHTML={{ __html: item.details }}
+      />
 
       <div className="mt-auto pt-12">
         <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
